@@ -17,6 +17,8 @@ let BMapLib = window.BMapLib;
 const App = () => {
   const inputRef = useRef(null);
   const [radius, setRadius] = useState(10);
+  const [max, setMax] = useState(-50);
+  const [min, setMin] = useState(-90);
 
   const readCSV = () => {
     inputRef.current.click();
@@ -35,7 +37,10 @@ const App = () => {
   }
 
   const dbm2per = (dbm) => {
-    return (+dbm + 90) * 10 / 4;
+    const m1 = +max;
+    const m2 = +min;
+    const d = m1 - m2;
+    return (+dbm - m2) * 100 / d;
   }
 
   const handleCSV = (e) => {
@@ -69,6 +74,7 @@ const App = () => {
                 lng: res[i][0],
                 lat: res[i][1],
                 count: dbm2per(res[i][2]),
+                dbm: res[i][2],
               })
             }
             // convertor.translate(points, 1, 5, (data) => {
@@ -106,6 +112,9 @@ const App = () => {
       map.clearOverlays();
       heatmapOverlay = new BMapLib.HeatmapOverlay({"radius": radius});
       map.addOverlay(heatmapOverlay);
+      for (let i = 0;i < dta.length;i++) {
+        dta[i].count = dbm2per(dta[i].dbm);
+      };
       heatmapOverlay.setDataSet({data:dta,max:100});
       heatmapOverlay.show();
     }
@@ -130,6 +139,8 @@ const App = () => {
       <input type="file" ref={inputRef} accept=".csv" onChange={(e) => handleCSV(e)} hidden />
       <FolderOutlined className="trigger" onClick={() => readCSV()} />
       <Input className="input" value={radius} onChange={(e) => changeRadius(e)} />
+      <Input className="input" value={max} onChange={(e) => setMax(e.target.value)} />
+      <Input className="input" value={min} onChange={(e) => setMin(e.target.value)} />
       <Button type="default" size='small' className='button' onClick={() => showNewHeatMapOverlay()}>应用</Button>
     </Header>
     <Content
