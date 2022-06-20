@@ -1,8 +1,6 @@
 /* eslint-disable no-loop-func */
 import { FolderOutlined } from '@ant-design/icons';
 import { Button, Input, Layout } from 'antd';
-import BMap from 'BMap';
-import BMapLib from 'BMapLib';
 import './App.css';
 import {BMAP_HYBRID_MAP, BMAP_NORMAL_MAP} from "./type";
 import React, { useEffect, useRef, useState } from 'react';
@@ -13,6 +11,8 @@ const { Header, Content } = Layout;
 let heatmapOverlay = '';
 let map = '';
 let dta = [];
+let BMap = window.BMap;
+let BMapLib = window.BMapLib;
 
 const App = () => {
   const inputRef = useRef(null);
