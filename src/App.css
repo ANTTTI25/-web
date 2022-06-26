@@ -20,6 +20,15 @@
   color: white;
 }
 
+.radio {
+  color: white;
+  margin: 0 10px;
+}
+
+.prefix {
+  color: white;
+}
+
 .button {
   color: #001529;
   height: 20px;

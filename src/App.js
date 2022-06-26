@@ -1,6 +1,6 @@
 /* eslint-disable no-loop-func */
 import { FolderOutlined } from '@ant-design/icons';
-import { Button, Input, Layout } from 'antd';
+import { Button, Input, Layout, Radio, Switch } from 'antd';
 import './App.css';
 import {BMAP_HYBRID_MAP, BMAP_NORMAL_MAP} from "./type";
 import React, { useEffect, useRef, useState } from 'react';
@@ -19,6 +19,7 @@ const App = () => {
   const [radius, setRadius] = useState(10);
   const [max, setMax] = useState(-50);
   const [min, setMin] = useState(-90);
+  const [needConvert, setNeedConvert] = useState(false);
 
   const readCSV = () => {
     inputRef.current.click();
@@ -44,7 +45,6 @@ const App = () => {
   }
 
   const handleCSV = (e) => {
-    let convertor = new BMap.Convertor();
     const file = e.target.files[0];
       const fReader = new FileReader();
       fReader.readAsDataURL(file); //  readAsDataURL 读取本地文件 得到的是一个base64值
@@ -60,7 +60,6 @@ const App = () => {
               res.pop();
             }
             console.log(res)
-            const points = [];
             // 当前res 就是二维数组的值 数据拿到了 那么在前端如何处理渲染 就根据需求再做进一步操作了
             for (let i = 1;i < res.length - 1;i++) {
               // points.push(new BMap.Point(res[i][0], res[i][1]));
@@ -71,8 +70,8 @@ const App = () => {
               //   count: dbm2per(+res[i][1]),
               // })
               dta.push({
-                lng: res[i][0],
-                lat: res[i][1],
+                lng: res[i][1],
+                lat: res[i][0],
                 count: dbm2per(res[i][2]),
                 dbm: res[i][2],
               })
@@ -94,7 +93,6 @@ const App = () => {
             //   heatmapOverlay.setDataSet({data:dta,max:100});
             //   heatmapOverlay.show();
             // })
-            console.log(dta)
             map.addOverlay(heatmapOverlay);
             heatmapOverlay.setDataSet({data:dta,max:100});
             heatmapOverlay.show();
@@ -102,7 +100,7 @@ const App = () => {
         });
       }
       return false;
-    };
+  };
 
     const changeRadius = (e) => {
       setRadius(+e.target.value);
@@ -115,8 +113,34 @@ const App = () => {
       for (let i = 0;i < dta.length;i++) {
         dta[i].count = dbm2per(dta[i].dbm);
       };
-      heatmapOverlay.setDataSet({data:dta,max:100});
-      heatmapOverlay.show();
+      console.log(needConvert)
+      if (needConvert) {
+        // eslint-disable-next-line no-unused-vars
+        let convertor = new BMap.Convertor();
+        const points = [];
+        for (let i = 0;i < dta.length;i++) {
+          points.push(new BMap.Point(dta[i].lng, dta[i].lat));
+        }
+        convertor.translate(points, 1, 5, (data) => {
+          console.log(data)
+          if (data.status === 0) {
+            for (let i = 0;i < data.points.length;i++) {
+              dta[i] = {
+                lng: data.points[i].lng,
+                lat: data.points[i].lat,
+                count: dta[i].count,
+                dbm: dta[i].dbm,
+              }
+            }
+            console.log(dta)
+            heatmapOverlay.setDataSet({data:dta,max:100});
+            heatmapOverlay.show();
+          }
+        })
+      } else {
+        heatmapOverlay.setDataSet({data:dta,max:100});
+        heatmapOverlay.show();
+      }
     }
 
   useEffect(() => {
@@ -130,6 +154,7 @@ const App = () => {
     map.setCurrentCity("武汉"); // 设置地图显示的城市 此项是必须设置的
     map.enableScrollWheelZoom();
     heatmapOverlay = new BMapLib.HeatmapOverlay({"radius": radius});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (
@@ -141,6 +166,8 @@ const App = () => {
       <Input className="input" value={radius} onChange={(e) => changeRadius(e)} />
       <Input className="input" value={max} onChange={(e) => setMax(e.target.value)} />
       <Input className="input" value={min} onChange={(e) => setMin(e.target.value)} />
+      <span className="prefix">{'启用坐标转换'}</span>
+      <Switch className="radio" onChange={(e) => setNeedConvert(e)} />
       <Button type="default" size='small' className='button' onClick={() => showNewHeatMapOverlay()}>应用</Button>
     </Header>
     <Content
