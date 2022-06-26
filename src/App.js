@@ -4,8 +4,9 @@ import { Button, Input, Layout, Radio, Switch } from 'antd';
 import './App.css';
 import {BMAP_HYBRID_MAP, BMAP_NORMAL_MAP} from "./type";
 import React, { useEffect, useRef, useState } from 'react';
-import Papa from "papaparse"
-import jschardet from "jschardet"
+import Papa from "papaparse";
+import jschardet from "jschardet";
+import heatmap from "./heatmap.png";
 const { Header, Content } = Layout;
 
 let heatmapOverlay = '';
@@ -16,9 +17,13 @@ let BMapLib = window.BMapLib;
 
 const App = () => {
   const inputRef = useRef(null);
-  const [radius, setRadius] = useState(10);
+  const [radius, setRadius] = useState(25);
   const [max, setMax] = useState(-50);
-  const [min, setMin] = useState(-90);
+  const [min, setMin] = useState(-150);
+  const [cnt2, setCnt2] = useState(-70);
+  const [cnt3, setCnt3] = useState(-90);
+  const [cnt4, setCnt4] = useState(-110);
+  const [cnt5, setCnt5] = useState(-130);
   const [needConvert, setNeedConvert] = useState(false);
 
   const readCSV = () => {
@@ -62,37 +67,13 @@ const App = () => {
             console.log(res)
             // 当前res 就是二维数组的值 数据拿到了 那么在前端如何处理渲染 就根据需求再做进一步操作了
             for (let i = 1;i < res.length - 1;i++) {
-              // points.push(new BMap.Point(res[i][0], res[i][1]));
-              // const location = res[i][0].split(" ");
-              // dta.push({
-              //   lat: +location[0],
-              //   lng: +location[1],
-              //   count: dbm2per(+res[i][1]),
-              // })
               dta.push({
-                lng: res[i][1],
-                lat: res[i][0],
-                count: dbm2per(res[i][2]),
-                dbm: res[i][2],
+                lng: +res[i][1],
+                lat: +res[i][0],
+                count: +dbm2per(res[i][2]),
+                dbm: +res[i][2],
               })
             }
-            // convertor.translate(points, 1, 5, (data) => {
-            //   console.log(data)
-            //   for (let i = 0;i < data.points.length;i++) {
-            //     dta.push({
-            //       lng: data.points[i].lng,
-            //       lat: data.points[i].lat,
-            //       count: dbm2per(res[i+1][2]),
-            //     })
-            //   }
-            //   CSVDatas.push({
-            //     key: file.name,
-            //     label: file.name,
-            //   });
-            //   map.addOverlay(heatmapOverlay);
-            //   heatmapOverlay.setDataSet({data:dta,max:100});
-            //   heatmapOverlay.show();
-            // })
             map.addOverlay(heatmapOverlay);
             heatmapOverlay.setDataSet({data:dta,max:100});
             heatmapOverlay.show();
@@ -157,6 +138,26 @@ const App = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  const changeMax = (value) => {
+    setMax(value);
+
+    const d = (value - min) / 5;
+    setCnt2(value - d);
+    setCnt3(value - d * 2);
+    setCnt4(value - d * 3);
+    setCnt5(value - d * 4);
+  }
+
+  const changeMin = (value) => {
+    setMin(value);
+
+    const d = (max - value) / 5;
+    setCnt2(max - d)
+    setCnt3(max - d * 2)
+    setCnt4(max - d * 3)
+    setCnt5(max - d * 4)
+  }
+
   return (
   <Layout className="container">
     <Header className="header">
@@ -164,8 +165,8 @@ const App = () => {
       <input type="file" ref={inputRef} accept=".csv" onChange={(e) => handleCSV(e)} hidden />
       <FolderOutlined className="trigger" onClick={() => readCSV()} />
       <Input className="input" value={radius} onChange={(e) => changeRadius(e)} />
-      <Input className="input" value={max} onChange={(e) => setMax(e.target.value)} />
-      <Input className="input" value={min} onChange={(e) => setMin(e.target.value)} />
+      <Input className="input" value={max} onChange={(e) => changeMax(e.target.value)} />
+      <Input className="input" value={min} onChange={(e) => changeMin(e.target.value)} />
       <span className="prefix">{'启用坐标转换'}</span>
       <Switch className="radio" onChange={(e) => setNeedConvert(e)} />
       <Button type="default" size='small' className='button' onClick={() => showNewHeatMapOverlay()}>应用</Button>
@@ -190,6 +191,15 @@ const App = () => {
           className="site-layout-background"
         >
           <div className="address" id="address" />
+          <div className="left-nav">
+            <div className='cnt1'>{max}</div>
+            <div className='cnt2'>{cnt2}</div>
+            <div className='cnt2'>{cnt3}</div>
+            <div className='cnt2'>{cnt4}</div>
+            <div className='cnt2'>{cnt5}</div>
+            <div className='cnt2'>{min}</div>
+          </div>
+          <img className="img" src={heatmap} alt="图例" />
         </Content>
       </Layout>
     </Content>
