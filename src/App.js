@@ -64,16 +64,22 @@ const App = () => {
             if(res[res.length - 1] === ""){    //去除最后的空行 有些解析数据尾部会多出空格
               res.pop();
             }
-            console.log(res)
+            const m = {};
             // 当前res 就是二维数组的值 数据拿到了 那么在前端如何处理渲染 就根据需求再做进一步操作了
             for (let i = 1;i < res.length - 1;i++) {
-              dta.push({
-                lng: +res[i][1],
-                lat: +res[i][0],
-                count: +dbm2per(res[i][2]),
-                dbm: +res[i][2],
-              })
+              if (m[res[i][0]] === res[i][1]) {
+                continue 
+              } else {
+                dta.push({
+                  lng: +res[i][1],
+                  lat: +res[i][0],
+                  count: +dbm2per(res[i][2]),
+                  dbm: +res[i][2],
+                });
+                m[res[i][0]] = res[i][1];
+              }
             }
+            console.log(res, dta, m);
             map.addOverlay(heatmapOverlay);
             heatmapOverlay.setDataSet({data:dta,max:100});
             heatmapOverlay.show();
@@ -94,7 +100,6 @@ const App = () => {
       for (let i = 0;i < dta.length;i++) {
         dta[i].count = dbm2per(dta[i].dbm);
       };
-      console.log(needConvert)
       if (needConvert) {
         // eslint-disable-next-line no-unused-vars
         let convertor = new BMap.Convertor();
