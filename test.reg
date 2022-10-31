@@ -1,0 +1,18 @@
+Windows Registry Editor Version 5.00
+ 
+[HKEY_CLASSES_ROOT\test]
+@="zhinengjiaotong"
+"URL Protocol"=""
+ 
+[HKEY_CLASSES_ROOT\test\DefaultIcon]
+@="D:\\AndroidDesign\\Webg\\public"
+ 
+[HKEY_CLASSES_ROOT\test\shell]
+@=""
+ 
+[HKEY_CLASSES_ROOT\test\shell\open]
+@=""
+ 
+[HKEY_CLASSES_ROOT\test\shell\open\command]
+@="\"D:\\AndroidDesign\\Webg\\public\\zhinengjiaotong.exe\" %1"
+//如果需要带参数，最后一行就换成这样=>  @="\"F:\\QQ\\Bin\\QQScLauncher.exe\" "
